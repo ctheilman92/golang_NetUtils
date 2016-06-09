@@ -8,6 +8,7 @@ import (
     "github.com/ctheilman92/Net_Utils/pkgCaptureDev"
     "github.com/ctheilman92/Net_Utils/pkgRead"
     "log"
+    "strings"
 )
 
 
@@ -86,21 +87,23 @@ func main() {
             os.Exit(0)
         }
 
-    fmt.Printf("[***]\nBACK TO MAIN MENU?(y/N): ")
-    fmt.Scanf("%s", &exiter)
-    if exiter == "y" { exiter = "Y" }    //lul
-    if exiter != "Y" && exiter != "n" {
-        log.Printf("\nExiting...")
-        break
-        running = false
-    } else if exiter == "n" {
-        fmt.Println("Quitting...")
-        running = false
-    } else {
-        c := exec.Command("clear")
-        c.Stdout = os.Stdout
-        c.Run()
-    }
+
+
+        fmt.Printf("\n[***] BACK TO MAIN MENU?(y/N): ")
+        fmt.Scanf("%s", &exiter)
+        exiter = strings.ToUpper(exiter)
+        if exiter != "Y" && exiter != "N" {
+            log.Printf("\nQuitting..")
+            break
+            running = false
+        } else if exiter == "N" {
+            log.Println("\nQuitting...")
+            running = false
+        } else {
+            c := exec.Command("clear")
+            c.Stdout = os.Stdout
+            c.Run()
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 package capture
 
 import (
-    //"bufio"
+    "bufio"
     "fmt"
     "os"
     "github.com/google/gopacket"
@@ -16,21 +16,29 @@ import (
 var (
     pcapFile        string
     device          string
-    //snapshot_len    int32 = 1024
+    snapshot_len    int32 = 1024
     promiscuous     bool = false
     err             error
     timeout         time.Duration = 50 * time.Second
     handle          *pcap.Handle
     packetCount     int = 0
+    breakflag       bool
 )
 
 //CAPTURE ALL PACKETS OUTPUT TO CONSOLE
 func AllToConsole() {
+    //attempting
+    // dojobs := make(chan int)
+    // quit := make(chan int)
+
     fmt.Printf("[*]Enter a device to capture: ")
     fmt.Scanf("%s", &device)
 
+    //set or reset breakflag
+    breakflag = false
+
     //open Devices
-    handle, err = pcap.OpenLive(device, 1024, promiscuous, timeout)
+    handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
     if err != nil {
         log.Fatal(err)
     }
@@ -39,10 +47,13 @@ func AllToConsole() {
     fmt.Println("OK")
     fmt.Println("[*]Press ENTER anytime to quit capturing\n================================================")
 
+    //goroutine grab keyboard interrupt
+    go keyinterrupt()
 
     //Process all packets (use var handle as source)
     packetSrc := gopacket.NewPacketSource(handle, handle.LinkType())
     for packet := range packetSrc.Packets() {
+        if breakflag == true { break }
         //process packetSrc
         fmt.Println(packet)
     }
@@ -50,16 +61,26 @@ func AllToConsole() {
 
 //CAPTURE HTTP ONLY OUTPUT TO CONSOLE
 func HttpToConsole() {
+    //attempting
+    // dojobs := make(chan int)
+    // quit := make(chan int)
+
     fmt.Printf("[*]Enter a device to capture: ")
     fmt.Scanf("%s", &device)
 
+    //set or reset breakflag
+    breakflag = false
+
     //open Devices
     //snapshotLen var problem converting so use literal number
-    handle, err = pcap.OpenLive(device, 1024, promiscuous, timeout)
+    handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
     if err != nil {
         log.Fatal(err)
     }
     defer handle.Close()
+
+    //goroutine grab keyboard interrupt
+    go keyinterrupt()
 
     //set filter
     //handle.SetBPFFilter
@@ -68,12 +89,13 @@ func HttpToConsole() {
     if err != nil {
         log.Fatal(err)
     }
-    fmt.Println("[*]Only Capturing TCP PORT 80 Packets...")
+    fmt.Println("[*]Only Capturing TCP PORT 80 Packets...\n")
 
     fmt.Printf("[*] Press ENTER anytime to quit capturing\n================================================")
     //get packets
     packetSrc := gopacket.NewPacketSource(handle, handle.LinkType())
     for packet := range packetSrc.Packets() {
+        if breakflag == true { break }
         //do something with packet here
         fmt.Println(packet)
     }
@@ -98,7 +120,7 @@ func AllToPcap() {
     defer f.Close()
 
     //open device for capturing
-    handle, err = pcap.OpenLive(device, 1024, promiscuous, timeout)
+    handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
     if err != nil {
         fmt.Printf("error opening device %s: %v", device, err)
         os.Exit(1)
@@ -136,7 +158,7 @@ func HttpToPcap() {
     defer f.Close()
 
     //open device for capturing
-    handle, err = pcap.OpenLive(device, 1024, promiscuous, timeout)
+    handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
     if err != nil {
         fmt.Printf("error opening device %s: %v", device, err)
         os.Exit(1)
@@ -165,16 +187,14 @@ func HttpToPcap() {
 }
 
 
+/******** /
+***************************
+    background functions
+***************************
+/ *******/
 
 
-
-
-
-
-
-
-
-func extCheck (filename string) {
+func extCheck(filename string) {
     //NOTE: 2 backslashes used to handle string parsing escape sequence error
     //real regex = (^.*\.(pcap)
     regxMatch, _ := regexp.MatchString("^.*\\.(pcap)$", filename)
@@ -183,4 +203,24 @@ func extCheck (filename string) {
         os.Exit(1)
     }
     return
+}
+
+
+// //goroutine look for interrupt to break
+func keyinterrupt() {
+    fmt.Println("FOR FUCKS SAKE AL! WTF! \n\n\n")
+    scanner := bufio.NewScanner(os.Stdin)
+    for scanner.Scan() {
+        keydown := scanner.Text()
+        if err := scanner.Err(); err != nil {
+            fmt.Println(err)
+            os.Exit(1)
+        }
+
+        if keydown == "" {
+            fmt.Println("\n\n\n[***] PACKET STREAM HALTED!\n")
+            breakflag = true
+            break
+        }
+    }
 }
