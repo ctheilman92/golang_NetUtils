@@ -4,9 +4,9 @@ import (
     "fmt"
     "os"
     "os/exec"
-    "github.com/ctheilman92/Net_Utils/pkgGetDev"
-    "github.com/ctheilman92/Net_Utils/pkgCaptureDev"
-    "github.com/ctheilman92/Net_Utils/pkgRead"
+    "golang_NetUtils/pkgGetDev"
+    "golang_NetUtils/pkgCaptureDev"
+    "golang_NetUtils/pkgRead"
     "log"
     "strings"
 )
@@ -82,9 +82,6 @@ func main() {
             fmt.Println("READING PCAP FILE")
             readpcap.Reader()
             break
-        default:
-            fmt.Println("nothing selected. QUITTING!!!")
-            os.Exit(0)
         }
 
 
