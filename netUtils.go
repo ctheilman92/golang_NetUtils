@@ -4,9 +4,9 @@ import (
     "fmt"
     "os"
     "os/exec"
-    "golang_NetUtils/pkgGetDev"
-    "golang_NetUtils/pkgCaptureDev"
-    "golang_NetUtils/pkgRead"
+    "github.com/ctheilman92/golang_NetUtils/pkgGetDev"
+    "github.com/ctheilman92/golang_NetUtils/pkgCaptureDev"
+    "github.com/ctheilman92/golang_NetUtils/pkgRead"
     "log"
     "strings"
 )
